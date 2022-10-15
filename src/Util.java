@@ -6,16 +6,35 @@ public class Util {
         return (int)(Math.random()*hasta+desde);
     }
 
+    public static void imprimirArreglo(int[] arreglo){
+        for(int i = 0; i < arreglo.length; i++) {
+            System.out.print(arreglo[i]);
+        }
+        System.out.println();
+    }
+    public static int [] concatenarArreglos(int[] arreglo1, int[] arreglo2){
+        int largo = arreglo1.length + arreglo2.length;
+        int [] result = new int[largo];
+        for(int i=0; i<arreglo1.length; i++){
+            result[i]=arreglo1[i];
+        }
+        for(int i=arreglo1.length; i<largo; i++){
+            result[i]=arreglo2[i-arreglo1.length];
+        }
+        return result;
+    }
+    public static String generarTramaRandomConTamanioRandom(){
+        return generarTramaRandomConTamanioFijo(Util.generarAleatorio(4, 15));
+    }
 
-    public static String generarTramaAleatoria(){
-        String dataStr = "";
-        int largo = Util.generarAleatorio(4, 15);
-        for(int i=0; i<largo; i++){
-            int a = Util.generarAleatorio(0, 2);
-            dataStr+=a;
+    public static String generarTramaRandomConTamanioFijo(int largo){
+        String dataStr = "1";
+        for(int i=1; i<largo; i++){
+            dataStr+=Util.generarAleatorio(0, 2);
         }
         return dataStr;
     }
+
     public static ArrayList<Integer> convertirArregloEnArrayList(int[] arreglo){
         ArrayList<Integer> result = new ArrayList<>();
         for(int i=0; i<arreglo.length; i++){
