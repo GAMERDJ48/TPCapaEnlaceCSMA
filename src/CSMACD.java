@@ -1,23 +1,10 @@
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 class CSMACD implements EstadoCanal {
 
-    public static void main(String args[])
-    {
-        Error.crc();
-        System.out.println();
-
-    }
-
-
-
-    /*
     public static void main(String args[]) {
-        String dataStr = "";
-        for(int i=0; i<10; i++){
-            dataStr+=Util.generarAleatorio(0, 2);
-        }
 
         Hilo.estadoCanal = LIBRE;
         int nroEstaciones=0;
@@ -32,7 +19,9 @@ class CSMACD implements EstadoCanal {
             arregloTramas[i] = Integer.parseInt(JOptionPane.showInputDialog("Ingrese el numero de tramas para la estacion "+i+": "));
             aux = new ArrayList<>();
             for(int j=1; j<=arregloTramas[i];j++){
-                aux.add(JOptionPane.showInputDialog("Ingrese la trama "+j+" de la Estacion "+i+": "));
+                String t = Util.generarTramaAleatoria();
+                aux.add(t);
+                System.out.println("Trama "+j+" de la Estacion "+i+": "+t);
             }
             tramas.add(aux);
         }
@@ -43,12 +32,12 @@ class CSMACD implements EstadoCanal {
             }
         }
 
-        for(int i = 1;i<=nroEstaciones;i++)
+        for(int i = 0;i<nroEstaciones;i++)
             hilos[i] = new Hilo("Estacion "+ Integer.toString(i), tramas.get(i));
 
         try {
         // Espera que las estaciones completen la transmisiones
-           for(int i=1;i<=nroEstaciones;i++)
+           for(int i=0;i<nroEstaciones;i++)
                 hilos[i].hilo.join();
            }
         catch (InterruptedException e) {
@@ -57,6 +46,5 @@ class CSMACD implements EstadoCanal {
         System.out.println("Transmision Completada");
 
     }
-    */
 
 }

@@ -6,6 +6,16 @@ public class Util {
         return (int)(Math.random()*hasta+desde);
     }
 
+
+    public static String generarTramaAleatoria(){
+        String dataStr = "";
+        int largo = Util.generarAleatorio(4, 15);
+        for(int i=0; i<largo; i++){
+            int a = Util.generarAleatorio(0, 2);
+            dataStr+=a;
+        }
+        return dataStr;
+    }
     public static ArrayList<Integer> convertirArregloEnArrayList(int[] arreglo){
         ArrayList<Integer> result = new ArrayList<>();
         for(int i=0; i<arreglo.length; i++){

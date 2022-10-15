@@ -41,101 +41,65 @@ public class Error {
     }
 
 
-    public static void crc(){
-        int [] r = {1,0,1,0,1,1,1};
-        ArrayList<Integer> trama = Util.convertirArregloEnArrayList(r);
-        int [] a = {1,0,1};
-        ArrayList<Integer> generador = Util.convertirArregloEnArrayList(a);
-        int[] b= {0,0,0};
-        ArrayList<Integer> resto = Util.convertirArregloEnArrayList(b);
-        ArrayList<Integer> crc;
-
-
-        resto = divide(trama, generador, resto);
-
-        /*
-        String lom="011101111";
-        trama=Util.convertirStringEnArreglo(lom);
-
-        String rami="1010";
-        generador = Util.convertirStringEnArreglo(rami);
-
-        largo=lom.length()+generador.length-1;
-
-        resto=new int[largo];
-        crc=new int[largo];
-
-
-        for(int i=0;i<trama.length;i++){
-            resto[i] = trama[i];
+    public static void crc(int[] datos) {
+        int[] divisor = {1,0,1};
+        // Divide the input datos by the input divisor and store the result in the resto array
+        int resto[] = divideDataWithDivisor(datos, divisor);
+        // iterate resto using for loop to print each bit
+        for(int i = 0; i < resto.length-1; i++) {
+            System.out.print(resto[i]);
         }
+        System.out.println("\nGenerated CRC code is: ");
 
-        //resto=divide(trama, generador, resto);
-
-
-        for(int i=0;i<trama.length;i++)
-        {
-            crc[i]=(trama[i]^resto[i]);
+        for(int i = 0; i < datos.length; i++) {
+            System.out.print(datos[i]);
         }
-
-        //resto=divide(crc, generador, resto);
-
-        for(int i=0; i< resto.length; i++)
-        {
-            if(resto[i]!=0)
-            {
-                System.out.println("Error su resto no es cero");
-                break;
-            }
-            if(i==resto.length-1)
-                System.out.println("No hay error su resto es igual  a 0");
-        }
-
-         */
-    }
-
-    //usado en el crc
-    static ArrayList<Integer> divide(ArrayList<Integer> trama, ArrayList<Integer> divisor,ArrayList<Integer> resto)
-    {
-        int contador=1;
-        ArrayList<Integer> diviendo = new ArrayList<>();
-        ArrayList<Integer> aux;
-        for(int i=0; i<divisor.size(); i++){
-            diviendo.add(trama.get(i));
-        }
-
-        while(true){
-            int result=0;
-            aux = new ArrayList<>();
-            boolean flag=false;
-            for(int i=0;i<divisor.size();i++) {
-                result = xor(diviendo.get(i), divisor.get(i));
-                if ((result == 1 && !flag)) {
-                    flag = true;
-                }
-                if(flag){
-                    aux.add(result);
-                }
-            }
-            if(aux.size()!=divisor.size()){
-                int dif = divisor.size()-aux.size();
-                for(int i=0; i<dif; i++){
-                    if(divisor.size()*contador>trama.size()) return diviendo;
-                    aux.add(trama.get((divisor.size()+i)*contador));
-                }
-                contador++;
-            }
-            diviendo.clear();
-            diviendo.addAll(aux);
-
+        for(int i = 0; i < resto.length-1; i++) {
+            System.out.print(resto[i]);
         }
     }
-    static int xor(int a, int b){
-        if(a==b){
+    // create divideDataWithDivisor() method to get CRC
+    static int[] divideDataWithDivisor(int oldData[], int divisor[]) {
+        // declare resto[] array
+        int resto[] = new int[divisor.length];
+        int i;
+        int data[] = new int[oldData.length + divisor.length];
+        // use system's arraycopy() method for copying data into resto and data arrays
+        System.arraycopy(oldData, 0, data, 0, oldData.length);
+        System.arraycopy(data, 0, resto, 0, divisor.length);
+        // iterate the oldData and exor the bits of the remainder and the divisor
+        for(i = 0; i < oldData.length; i++) {
+            System.out.println((i+1) + ".) First data bit is : "+ resto[0]);
+            System.out.print("Remainder : ");
+            if(resto[0] == 1) {
+                // We have to exor the remainder bits with divisor bits
+                for(int j = 1; j < divisor.length; j++) {
+                    resto[j-1] = exorOperation(resto[j], divisor[j]);
+                    System.out.print(resto[j-1]);
+                }
+            }
+            else {
+                // We have to exor the remainder bits with 0
+                for(int j = 1; j < divisor.length; j++) {
+                    resto[j-1] = exorOperation(resto[j], 0);
+                    System.out.print(resto[j-1]);
+                }
+            }
+            // The last bit of the remainder will be taken from the data
+            // This is the 'carry' taken from the dividend after every step
+            // of division
+            resto[divisor.length-1] = data[i+divisor.length];
+            System.out.println(resto[divisor.length-1]);
+        }
+        return resto;
+    }
+    // create exorOperation() method to perform exor data
+    static int exorOperation(int x, int y) {
+        // This simple function returns the exor of two bits
+        if(x == y) {
             return 0;
-        }else{
-            return 1;
         }
+        return 1;
     }
 
 }
