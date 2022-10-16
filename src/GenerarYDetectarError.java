@@ -1,13 +1,13 @@
-public class Error {
+public class GenerarYDetectarError {
     //Recibe una trama (solo los datos) como entrada y cambia bits aleatoreamente
-    public static boolean error;
-    public static int[] generarError(int[] arreglo){
+    private boolean error;
+    public int[] generarError(int[] arreglo){
         //Genero la cantidad de errores
         int cantErrores = generarCantidadErroresRealista();
 
         for(int i=0; i<cantErrores;i++){
             //stat guarda la posicion donde voy a cambiar el bit (error), genero un nro aleatorio y luego lo guardo en stat
-            int stat = Util.generarAleatorio(0, arreglo.length);
+            int stat = new Util().generarAleatorio(0, arreglo.length);
             //Si el bit es 0 lo cambio a 1, si es 1 lo cambio a 0
             if(arreglo[stat]==0){
                 arreglo[stat]=1;
@@ -19,7 +19,7 @@ public class Error {
     }
 
     //Generador de cantidad de errores basado en probabilidades que considera la posibilidad de que se generen cero errores, es usada en la funcion GenerarError
-    private static int generarCantidadErroresRealista(){
+    private int generarCantidadErroresRealista(){
         int a = (int)(Math.random()*100); // enteros generados aleatoriamente de [0,100), la probabilidad de que aparezca cada número es 1%// número de resultado requerido
         int b; //Cantidad de errores
         if (a <50) {// Intervalo de los primeros 50 números, que representa una probabilidad del 50%
@@ -41,7 +41,7 @@ public class Error {
     }
 
     //Siempre genera una cantidad igual o superior a 1 de errores
-    private static int generarCantidadErrores(){
+    private int generarCantidadErrores(){
         int a = (int)(Math.random()*100);
         int b;
         error=true;
@@ -61,7 +61,7 @@ public class Error {
         return b;
     }
 
-    public static void evaluarRendimientoCRC(){
+    public void evaluarRendimientoCRC(){
         int[] datos;
         int[] crc;
 
@@ -71,26 +71,31 @@ public class Error {
         for(int j=0; j<repeticiones; j++){
             contadorErroresCRC =0;
             for(int i=0; i<largo; i++){
-                datos = Util.convertirStringEnArreglo(Util.generarTramaRandomConTamanioRandom());
-                crc = Error.aplicarCRC(datos);
-                crc = Error.generarError(crc);
-                Error.verificarCRC(crc);
+                Util util = new Util();
+                datos = util.convertirStringEnArreglo(util.generarTramaRandomConTamanioRandom());
+                crc = aplicarCRC(datos);
+                crc = generarError(crc);
+                verificarCRC(crc);
             }
             totalErrores+=contadorErroresCRC;
         }
         System.out.println("Promedio de errores: "+(totalErrores/repeticiones));
     }
 
-    private static int[] divisor = {1,0,1};
-    public static int[] aplicarCRC(int[] datos) {
+    private static int[] divisor;
+
+    static{
+        divisor = new int[]{1, 0, 1};
+    }
+    public int[] aplicarCRC(int[] datos) {
         // Divide la entrada de datos por el divisor y lo guarda en el arreglo resto
-        determinarPolinomioGenerador(datos);
+
         int resto[] = divide(datos);
 
-        return Util.concatenarArreglos(datos, resto);
+        return new Util().concatenarArreglos(datos, resto);
     }
 
-    public static void determinarPolinomioGenerador(int[] datos){
+    private void determinarPolinomioGenerador(int[] datos){
         int grado=0;
         for(int i=0; i<datos.length; i++){
             if(datos[i]==1){
@@ -98,10 +103,11 @@ public class Error {
                 break;
             }
         }
-        divisor = Util.convertirStringEnArreglo(Util.generarTramaRandomConTamanioFijo(grado));
+        Util util = new Util();
+        divisor = util.convertirStringEnArreglo(util.generarTramaRandomConTamanioFijo(grado));
     }
     // metodo para obtener el crc
-    static int[] divide(int datosOriginales[]) {
+    private int[] divide(int datosOriginales[]) {
         int resto[] = new int[divisor.length];
         int datos[] = new int[datosOriginales.length + divisor.length];
 
@@ -135,32 +141,41 @@ public class Error {
      0 - 1 --> 1
      1 - 1 --> 0
      */
-    private static int operacionXOR(int x, int y) {
+    private int operacionXOR(int x, int y) {
         if(x == y) {
             return 0;
         }
         return 1;
     }
 
-    public static int contadorErroresCRC;
-    static void verificarCRC(int data[]) {
+    private int contadorErroresCRC;
+    //Se utiliza cuando se recibe la trama, el recepto verifica el codigo para ver si tiene errores. Devuelve TRUE si la trama es correcta
+    boolean verificarCRC(int data[]) {
         //Se realiza la division con el divisor
         int resto[] = divide(data);
 
         for(int i = 0; i < resto.length; i++) {
             if(resto[i] != 0) {
                 // Si el resto no equivale a cero, entonces los datos han sido corrompidos
-                if(!error){
-                    System.out.println("El CRC detecto un error pero este no existe");
-                }
+
                 //System.out.println("\nDatos corruptos, pidiendo retransmision...");
-                return;
+                return false;
             }
         }
+        //Se usa para evaluar el rendimiento
         if(error){
+            //Si entro aqui es que genere un error y el CRC no lo detecto
             contadorErroresCRC++;
         }
+        return true;
         //Si para el for sin entrar al if significa que los datos han sido entregados correctamente
+    }
+
+    public String recuperarPayload(int data[]){
+        int largo= data.length - divisor.length;
+        int[] result = new int[largo];
+        System.arraycopy(data, 0, result, 0, largo);
+        return new Util().convertirArregloEnString(result);
     }
 
 }

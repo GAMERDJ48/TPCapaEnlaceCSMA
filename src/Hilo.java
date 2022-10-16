@@ -8,17 +8,18 @@ class Hilo implements Runnable, EstadoCanal {
     static int distancia, nroEstacionActual =0, trama;
     static int estadoCanal; //Indica si el canal esta en uso
     int nroTrama, nroMaxTramas;
-    private ArrayList<String> tramas;
+    private ArrayList<Trama> tramas;
     private AtomicBoolean transmisionExitosa;
     static final int constanteTiempo =50; //Constante usada para el tiempo de contencion
     private int nroIntento;
 
 
-    Hilo(String nombreHilo, ArrayList<String> tramas) {
-        nombreEstacion = nombreHilo;
+    Hilo(Estacion estacion) {
         //Creo el hilo y le asigno el nombre de la Estacion
+        nombreEstacion = "Estacion "+ estacion.getNroEstacion();
         hilo = new Thread(this, nombreEstacion);
-        this.tramas = tramas;
+
+        this.tramas = estacion.getTramas();
         nroTrama = 1;
         this.nroMaxTramas =tramas.size();
         //Atomic Boolean es lo mismo que Boolean, la diferencia radica en que suele ser mas util el Atomic para hilos ya que cambia de valor sin afectar los procesos de los hilos
@@ -32,13 +33,21 @@ class Hilo implements Runnable, EstadoCanal {
     public void run() {
         //Para generar nros aleatorios
         Random rand = new Random();
+        try {
+            Thread.sleep(new Util().generarAleatorio(300,2000));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        //Inicio de intento de transmision
         while (!transmisionExitosa.get()) {
             nroIntento++;
             while(nroTrama <= nroMaxTramas) {
+                Estacion estacion = Estacion.buscarEstacion(getNroEstacion(nombreEstacion));
+                estacion.enviarTrama(nroTrama-1);
                 if (nroIntento < 16) { //16 es el numero maximo de intentos
                     try {
                         if (estadoCanal == ENUSO) {
-                            System.out.println("Canal en uso: "+nombreEstacion + "esta en espera....");
+                            System.out.println("Canal en uso: "+nombreEstacion + " esta en espera....");
                             try {
                                 Thread.sleep(rand.nextInt(50)+1000);
                             }
@@ -57,11 +66,20 @@ class Hilo implements Runnable, EstadoCanal {
                                 for (; distancia < 9000000; distancia++)
                                     for(int i =0;i<1000;i++); //Simula el tiempo de transmision
 
+                                Trama trama = tramas.get(nroTrama-1);
+                                GenerarYDetectarError error = new GenerarYDetectarError();
+                                trama.setPayload(error.generarError(trama.getPayload()));
+                                Estacion destino = Estacion.buscarEstacion(trama.getDestino());
 
-                                System.out.println(nombreEstacion + ": ha transmitido la trama " + nroTrama + " exitosamente");
-
-                                transmisionExitosa.set(true);
-                                nroTrama++;
+                                if(destino.recibirTrama(trama)){
+                                    System.out.println(nombreEstacion + ": ha transmitido la trama " + nroTrama + " exitosamente");
+                                    transmisionExitosa.set(true);
+                                    nroTrama++;
+                                }else{
+                                    System.out.println("Trama "+nroTrama+" de la "+nombreEstacion+" corrompida....retransmitiendo");
+                                    Thread.sleep(new Util().generarAleatorio(300,500));
+                                    transmisionExitosa.set(false);
+                                }
                                 distancia = 0; //Reseteo la distancia para la siguente transmision
                                 estadoCanal = LIBRE;
                             }
@@ -69,7 +87,7 @@ class Hilo implements Runnable, EstadoCanal {
                                 System.out.println("Colision para la trama " + nroTrama + " de la " +
                                         nombreEstacion + " con la trama " + trama + " de la Estacion " + nroEstacionActual);
 
-                                System.out.println("Retransmitiendo trama"+trama+" de la Estacion "+nroEstacionActual+".....");
+                                System.out.println("Retransmitiendo trama "+trama+" de la Estacion "+nroEstacionActual+".....");
                                 transmisionExitosa.set(false);
                                 estadoCanal = LIBRE;
 

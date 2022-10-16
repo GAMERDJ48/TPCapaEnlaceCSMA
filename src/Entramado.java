@@ -7,7 +7,9 @@ public class Entramado {
     //de la trama se le agrega un 0 luego de los 5 unos
 
     //Toma como entrada la trama y le agrega el entramado utilizado
-    public static String entramar(ArrayList<Integer> trama){
+    public static int[] entramar(int[] t){
+        Util util = new Util();
+        ArrayList<Integer> trama = util.convertirArregloEnArrayList(t);
         int contador=0; //Cuenta la cantidad de unos que se detectan
         for(int i=0; i<trama.size(); i++){
             if(contador<flag){
@@ -28,12 +30,13 @@ public class Entramado {
             trama.add(1);
             trama.add(0, 1);
         }
-        return Util.convertirArrayListEnString(trama);
+        return util.convertirArrayListEnArreglo(trama);
     }
 
     //Cuando el receptor recibe la trama debe obtener la trama original, sin entramar
-    public static String desentramar(ArrayList<Integer> trama){
-
+    public static int[] desentramar(int[] t){
+        Util util = new Util();
+        ArrayList<Integer> trama = util.convertirArregloEnArrayList(t);
         //Quita los unos que estan al principio y al final de la trama
         for(int i=0; i<flag; i++){
             trama.remove(trama.size()-1);
@@ -57,7 +60,7 @@ public class Entramado {
         }
 
 
-        return Util.convertirArrayListEnString(trama);
+        return util.convertirArrayListEnArreglo(trama);
     }
 
 
